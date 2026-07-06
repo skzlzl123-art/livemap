@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>위치 전송기</title>
+    <script src="https://www.gstatic.com/firebasejs/10.x.x/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.x.x/firebase-database-compat.js"></script>
+</head>
+<body>
+    <h2>실시간 위치 전송 중...</h2>
+    <div id="status">대기 중</div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDjNRMGeWGzILRdZPLGbfP0fa9uL9RE8yM",
+            databaseURL: "https://coat-navi-default-rtdb.firebaseio.com/",
+            projectId: "coat-navi",
+            appId: "1:272011216622:web:fa6ebff68444b1298095ff"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // 🔴 내 프로필 이미지 주소 (마커로 사용할 이미지 URL)
+        const myProfileImg = "https://yourdomain.com/profile.png"; 
+
+        if (navigator.geolocation) {
+            // 위치가 바뀔 때마다 자동으로 실행 (실시간 추적)
+            navigator.geolocation.watchPosition(success, error, {
+                enableHighAccuracy: true, // 높은 정확도 사용
+                timeout: 5000,
+                maximumAge: 0
+            });
+        } else {
+            alert("GPS를 지원하지 않는 브라우저입니다.");
+        }
+
+        function success(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            
+            document.getElementById('status').innerText = `위도: ${lat}, 경도: ${lng}`;
+
+            // Firebase에 실시간 좌표 및 프로필 저장
+            database.ref('liveLocation').set({
+                lat: lat,
+                lng: lng,
+                profile: myProfileImg,
+                timestamp: Date.now()
+            });
+        }
+
+        function error(err) {
+            console.warn(`ERROR(${err.code}): ${err.message}`);
+        }
+    </script>
+</body>
+</html>
